@@ -1,161 +1,149 @@
-// Configuration
+// ==========================================
+// TNBJO APP LOGIC (app.js)
+// ==========================================
 const CONFIG = {
-    LIFF_ID: "2011791349-cKlWurTV", // ใส่ LIFF ID ที่ได้จาก LINE Developers
-    API_URL: "https://script.google.com/macros/s/AKfycbyVRqZvi_FvC7g6TkaqPtFO9wovgc9_xy1jcKCsz_o2GzZs8VVrlCmsSYsr51fkqj-b/exec" // ใส่ URL ของ Web App หลัง Deploy GAS
+    LIFF_ID: "YOUR_LIFF_ID", // ใส่ LIFF ID (เช่น 1234567890-AbCdEfG)
+    API_URL: "YOUR_GAS_WEB_APP_URL" // ใส่ URL ของเว็บแอปที่ Deploy จาก Code.gs
 };
 
-let currentUserData = null;
-let currentLineProfile = null;
+let userProfile = null; // ข้อมูลจาก LINE
+let memberData = null;  // ข้อมูลจาก Database
 
-// Initialize
-window.onload = function() {
-    // ถ้าต้องการเทสบน Browser ปกติโดยไม่ผ่าน LINE ให้ uncomment บรรทัดล่าง
-    // mockLogin(); return; 
-
-    initializeLiff();
-};
-
-async function initializeLiff() {
+// 1. Initialize LIFF & App
+window.onload = async () => {
     try {
         await liff.init({ liffId: CONFIG.LIFF_ID });
-        if (liff.isLoggedIn()) {
-            currentLineProfile = await liff.getProfile();
-            checkMember(currentLineProfile.userId);
-        } else {
+        if (!liff.isLoggedIn()) {
             liff.login();
+        } else {
+            userProfile = await liff.getProfile();
+            verifyMember(userProfile.userId);
         }
     } catch (err) {
-        console.error("LIFF Init Error:", err);
-        alert("ไม่สามารถเชื่อมต่อ LINE ได้ กรุณาลองใหม่");
+        console.error(err);
+        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อ LINE ได้', 'error');
     }
+};
+
+// 2. เรียกใช้งาน API
+async function apiCall(action, data) {
+    const res = await fetch(CONFIG.API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action, data }),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+    });
+    return await res.json();
 }
 
-// API Call Wrapper
-async function callAPI(action, data) {
-    try {
-        const response = await fetch(CONFIG.API_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: action, data: data }),
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' } // GAS ต้องการ text/plain
-        });
-        return await response.json();
-    } catch (error) {
-        console.error("API Error:", error);
-        return { success: false, error: { message: "การเชื่อมต่อขัดข้อง" } };
-    }
-}
-
-// Check Member Status
-async function checkMember(lineUserId) {
-    const res = await callAPI('getMember', { line_user_id: lineUserId });
+// 3. ตรวจสอบสถานะสมาชิก
+async function verifyMember(lineUserId) {
+    const res = await apiCall('getMember', { line_user_id: lineUserId });
     
-    document.getElementById('loadingOverlay').style.display = 'none';
+    document.getElementById('loader').style.display = 'none';
     document.getElementById('app').style.display = 'block';
 
-    if (res.success && res.data) {
-        currentUserData = res.data;
+    if (res.success) {
+        memberData = res.data;
         updateUI();
         switchView('viewHome');
     } else {
-        // Not a member -> Go to register
+        // ยังไม่ได้สมัคร
         switchView('viewRegister');
     }
 }
 
-// Registration Submit
-document.getElementById('registerForm').addEventListener('submit', async (e) => {
+// 4. อัปเดตข้อมูลหน้าจอ
+function updateUI() {
+    if(!memberData) return;
+    document.getElementById('uiName').innerText = memberData.first_name || userProfile.displayName;
+    document.getElementById('uiImg').src = userProfile.pictureUrl || 'https://via.placeholder.com/150';
+    document.getElementById('uiPoints').innerText = Number(memberData.total_points).toLocaleString();
+    document.getElementById('uiPointsReward').innerText = Number(memberData.total_points).toLocaleString();
+    document.getElementById('uiID').innerText = memberData.member_id;
+    document.getElementById('uiLevel').innerText = memberData.member_level;
+}
+
+// 5. สมัครสมาชิก
+document.getElementById('formRegister').addEventListener('submit', async (e) => {
     e.preventDefault();
-    document.getElementById('loadingOverlay').style.display = 'flex';
+    
+    Swal.fire({ title: 'กำลังบันทึกข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
     const payload = {
-        line_user_id: currentLineProfile.userId,
-        display_name: currentLineProfile.displayName,
-        profile_image: currentLineProfile.pictureUrl,
-        first_name: document.getElementById('regFirstName').value,
-        last_name: document.getElementById('regLastName').value,
-        phone: document.getElementById('regPhone').value,
-        birthday: document.getElementById('regBirthday').value
+        line_user_id: userProfile.userId,
+        display_name: userProfile.displayName,
+        first_name: document.getElementById('regFirst').value,
+        last_name: document.getElementById('regLast').value,
+        phone: document.getElementById('regPhone').value
     };
 
-    const res = await callAPI('registerMember', payload);
+    const res = await apiCall('registerMember', payload);
     if (res.success) {
-        alert("สมัครสมาชิกสำเร็จ!");
-        checkMember(currentLineProfile.userId); // โหลดข้อมูลใหม่เข้า Home
+        Swal.fire('สำเร็จ', 'ยินดีต้อนรับสู่ครอบครัว TNBJO', 'success').then(() => {
+            document.getElementById('loader').style.display = 'flex';
+            verifyMember(userProfile.userId); // รีโหลดข้อมูลใหม่
+        });
     } else {
-        document.getElementById('loadingOverlay').style.display = 'none';
-        alert("เกิดข้อผิดพลาด: " + res.error.message);
+        Swal.fire('ข้อผิดพลาด', res.message, 'error');
     }
 });
 
-// Update UI with User Data
-function updateUI() {
-    if(!currentUserData) return;
-    
-    document.getElementById('uiUserName').innerText = currentUserData.first_name || currentUserData.display_name;
-    document.getElementById('uiUserImage').src = currentUserData.profile_image || 'https://via.placeholder.com/50';
-    document.getElementById('uiMemberLevel').innerText = currentUserData.member_level;
-    
-    const pts = Number(currentUserData.total_points).toLocaleString();
-    document.getElementById('uiTotalPoints').innerText = pts;
-    
-    const pointDisplays = document.querySelectorAll('.user-points-display');
-    pointDisplays.forEach(el => el.innerText = pts);
-    
-    document.getElementById('uiMemberId').innerText = currentUserData.member_id;
-}
-
-// View Controller (Navigation)
-function switchView(viewId, navElement = null) {
-    // Hide all views
+// 6. เปลี่ยนหน้าจอ (Tab Navigation)
+function switchView(viewId, navEl = null) {
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-    // Show target view
     document.getElementById(viewId).classList.add('active');
-
-    // Update Bottom Nav Active State
-    if(navElement) {
+    
+    if (navEl) {
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        navElement.classList.add('active');
+        navEl.classList.add('active');
     }
 }
 
-// QR Code Modal
-function showMemberQR() {
-    if(!currentUserData) return;
+// 7. สร้าง QR Code ด้วย SweetAlert2 (พรีเมียม UI)
+function openQR() {
+    if(!memberData) return;
+    const template = document.getElementById('qrTemplate').innerHTML;
     
-    const qrContainer = document.getElementById("qrcodeDisplay");
-    qrContainer.innerHTML = ""; // Clear old QR
-    
-    // สร้าง QR Code จาก Member ID
-    new QRCode(qrContainer, {
-        text: currentUserData.member_id,
-        width: 200,
-        height: 200,
-        colorDark : "#3E2723",
-        colorLight : "#ffffff",
-        correctLevel : QRCode.CorrectLevel.H
+    Swal.fire({
+        html: template,
+        showConfirmButton: false,
+        showCloseButton: true,
+        didOpen: () => {
+            new QRCode(document.getElementById("qrBox"), {
+                text: memberData.member_id,
+                width: 200, height: 200,
+                colorDark : "#3E2723", colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            document.getElementById('qrIdText').innerText = memberData.member_id;
+        }
     });
-    
-    document.getElementById("qrMemberIdTxt").innerText = "ID: " + currentUserData.member_id;
-    document.getElementById("qrModal").style.display = "flex";
 }
 
-function closeQRModal() {
-    document.getElementById("qrModal").style.display = "none";
-}
-
-// Demo Redeem
-function redeemDemo() {
-    if(confirm("ยืนยันการแลกรางวัลนี้หรือไม่?")) {
-        alert("ระบบจำลอง: ส่ง Request ไปที่ API redeemReward()");
+// 8. ระบบจำลองการตัดแต้ม (ฝั่ง Client)
+function redeem(cost, item) {
+    if (Number(memberData.total_points) < cost) {
+        Swal.fire('ขออภัย', 'คะแนนของคุณไม่เพียงพอ', 'warning');
+        return;
     }
+    
+    Swal.fire({
+        title: 'ยืนยันการแลกของรางวัล?',
+        text: `คุณต้องการใช้ ${cost} แต้ม เพื่อแลก "${item}" ใช่หรือไม่?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3E2723',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'ยืนยัน',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire('สำเร็จ!', 'โปรดนำหน้าจอนี้แสดงให้พนักงาน', 'success');
+            // ในระบบจริง จะต้องเรียก apiCall('redeemReward', ...) เพื่อหักแต้มใน DB
+        }
+    });
 }
 
-// สำหรับทดสอบบน Browser (ไม่ผ่าน LINE)
-function mockLogin() {
-    currentLineProfile = {
-        userId: "U_MOCK_1234567890",
-        displayName: "Mock User",
-        pictureUrl: "https://via.placeholder.com/50"
-    };
-    checkMember(currentLineProfile.userId);
+function alertSystem() {
+    Swal.fire('Coming Soon', 'ฟังก์ชันบัญชีส่วนตัวกำลังอยู่ระหว่างการพัฒนา', 'info');
 }
