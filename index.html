@@ -4,174 +4,174 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>TNBJO Member</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css">
-    <!-- LIFF SDK -->
-    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <!-- SweetAlert2 (Premium UI Alerts) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- QR Code Generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- LIFF SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="spinner"></div>
-        <p>กำลังโหลดข้อมูล...</p>
+    <!-- Loading Screen -->
+    <div id="loader" class="screen-loader">
+        <div class="loader-spinner"></div>
+        <p>กำลังเชื่อมต่อระบบ TNBJO...</p>
     </div>
 
-    <!-- Main App Container -->
-    <div id="app" class="app-container" style="display: none;">
+    <div id="app" style="display: none;">
         
-        <!-- View: Register -->
+        <!-- ================= REGISTER VIEW ================= -->
         <div id="viewRegister" class="view-section">
-            <div class="header-banner">
-                <h1>TNBJO</h1>
-                <p>Traditional Noodles By Jea Ons</p>
+            <div class="hero-header">
+                <img src="https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&w=800&q=80" class="hero-bg" alt="bg">
+                <div class="hero-content">
+                    <h1>TNBJO</h1>
+                    <p>Traditional Noodles By Jea Ons</p>
+                </div>
             </div>
-            <div class="content-padding">
-                <h2 style="text-align:center; color:var(--dark-brown); margin-bottom: 20px;">สมัครสมาชิกใหม่</h2>
-                <form id="registerForm">
-                    <div class="input-group">
-                        <label>ชื่อ <span class="req">*</span></label>
-                        <input type="text" id="regFirstName" required>
-                    </div>
-                    <div class="input-group">
-                        <label>นามสกุล <span class="req">*</span></label>
-                        <input type="text" id="regLastName" required>
-                    </div>
-                    <div class="input-group">
-                        <label>เบอร์โทรศัพท์ <span class="req">*</span></label>
-                        <input type="tel" id="regPhone" required>
-                    </div>
-                    <div class="input-group">
-                        <label>วันเกิด (เพื่อรับสิทธิ์พิเศษ)</label>
-                        <input type="date" id="regBirthday">
-                    </div>
-                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 20px;">ลงทะเบียน</button>
-                </form>
+            <div class="container" style="margin-top: -30px; position: relative; z-index: 10;">
+                <div class="card p-20">
+                    <h2 class="text-center text-brown mb-20">ลงทะเบียนสมาชิก</h2>
+                    <form id="formRegister">
+                        <div class="form-group">
+                            <label>ชื่อจริง <span class="text-red">*</span></label>
+                            <input type="text" id="regFirst" class="form-control" required placeholder="เช่น สมชาย">
+                        </div>
+                        <div class="form-group">
+                            <label>นามสกุล <span class="text-red">*</span></label>
+                            <input type="text" id="regLast" class="form-control" required placeholder="เช่น ใจดี">
+                        </div>
+                        <div class="form-group">
+                            <label>เบอร์โทรศัพท์ <span class="text-red">*</span></label>
+                            <input type="tel" id="regPhone" class="form-control" required placeholder="08xxxxxxxx" pattern="[0-9]{10}">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mt-10">ยืนยันการสมัครสมาชิก</button>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <!-- View: Home -->
+        <!-- ================= HOME VIEW ================= -->
         <div id="viewHome" class="view-section">
-            <div class="top-nav">
-                <div class="greeting">
-                    <p>สวัสดี, <span id="uiUserName">คุณลูกค้า</span></p>
-                    <h3>ยินดีต้อนรับสู่ TNBJO</h3>
+            <div class="topbar">
+                <div class="user-greeting">
+                    <p>ยินดีต้อนรับกลับมา</p>
+                    <h3 id="uiName">คุณลูกค้า</h3>
                 </div>
-                <img id="uiUserImage" src="https://via.placeholder.com/50" alt="Profile" class="profile-thumb">
+                <img id="uiImg" src="https://via.placeholder.com/150" class="avatar" alt="Profile">
             </div>
 
-            <div class="content-padding">
+            <div class="container pb-100">
                 <!-- Member Card -->
                 <div class="member-card">
-                    <div class="card-logo">TNBJO MEMBER</div>
-                    <div class="card-level" id="uiMemberLevel">JO MEMBER</div>
-                    <div class="card-points">
-                        <span id="uiTotalPoints">0</span> 
-                        <small>JO Point</small>
-                    </div>
-                    <div class="card-id">ID: <span id="uiMemberId">TNBJO-XXXXXX</span></div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="action-grid">
-                    <div class="action-btn" onclick="showMemberQR()">
-                        <div class="icon-circle"><i class="fa-solid fa-qrcode"></i></div>
-                        <span>QR สมาชิก</span>
-                    </div>
-                    <div class="action-btn" onclick="switchView('viewRewards')">
-                        <div class="icon-circle"><i class="fa-solid fa-gift"></i></div>
-                        <span>แลกรางวัล</span>
+                    <div class="card-glass"></div>
+                    <div class="card-content">
+                        <div class="d-flex-between">
+                            <div class="brand">TNBJO</div>
+                            <div class="level" id="uiLevel">JO MEMBER</div>
+                        </div>
+                        <div class="points-wrapper mt-20">
+                            <div class="points-label">คะแนนสะสมของคุณ</div>
+                            <div class="points-value"><span id="uiPoints">0</span> <small>JO Point</small></div>
+                        </div>
+                        <div class="d-flex-between mt-20">
+                            <div class="member-id">ID: <span id="uiID">TNBJO-XXXXXX</span></div>
+                            <button class="btn-qr-small" onclick="openQR()">
+                                <i class="fa-solid fa-qrcode"></i> แสดง QR
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Section Title -->
-                <h3 class="section-title">โปรโมชั่น & ข่าวสาร</h3>
-                <div class="promo-card">
-                    <div class="promo-img"></div>
-                    <div class="promo-text">
-                        <h4>สมัครสมาชิกวันนี้รับฟรี!</h4>
-                        <p>รับทันที 50 JO Point สำหรับสมาชิกใหม่</p>
+                <!-- Action Menu -->
+                <div class="grid-2 gap-15 mt-20">
+                    <div class="action-box" onclick="openQR()">
+                        <div class="icon bg-gold-light text-brown"><i class="fa-solid fa-expand"></i></div>
+                        <span>สะสมแต้ม</span>
+                    </div>
+                    <div class="action-box" onclick="switchView('viewRewards')">
+                        <div class="icon bg-gold-light text-brown"><i class="fa-solid fa-gift"></i></div>
+                        <span>แลกของรางวัล</span>
+                    </div>
+                </div>
+                
+                <!-- Banners -->
+                <h3 class="section-title mt-20">สิทธิพิเศษสำหรับคุณ</h3>
+                <div class="promo-banner">
+                    <div class="promo-content">
+                        <h4>กินครบ 10 ชาม ฟรี 1 ชาม!</h4>
+                        <p>ใช้ 500 JO Point แลกรับสิทธิ์ทันที</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- View: Rewards -->
+        <!-- ================= REWARDS VIEW ================= -->
         <div id="viewRewards" class="view-section">
-            <div class="page-header">
-                <h2>แลกรางวัล</h2>
+            <div class="page-header text-center">
+                <h2>แลกของรางวัล</h2>
+                <p>คะแนนของคุณ: <strong class="text-gold" id="uiPointsReward">0</strong> JO Point</p>
             </div>
-            <div class="content-padding">
-                <div class="point-summary">
-                    <p>คะแนนสะสมของคุณ</p>
-                    <h3><span class="user-points-display">0</span> JO Point</h3>
-                </div>
-                <!-- Mockup Reward Item -->
-                <div class="reward-item">
-                    <div class="reward-info">
-                        <h4>ก๋วยเตี๋ยวฟรี 1 ชาม</h4>
-                        <p><i class="fa-solid fa-coins"></i> 500 Point</p>
+            <div class="container pb-100">
+                <div class="reward-list">
+                    <!-- Reward Item 1 -->
+                    <div class="reward-card">
+                        <div class="reward-img" style="background-image: url('https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=500&q=60');"></div>
+                        <div class="reward-detail">
+                            <h4>ก๋วยเตี๋ยวฟรี 1 ชาม</h4>
+                            <p class="text-gray text-sm">ก๋วยเตี๋ยวโบราณสูตรเจ๊อ้น (ชามปกติ)</p>
+                            <div class="d-flex-between align-center mt-10">
+                                <span class="points-req"><i class="fa-solid fa-coins"></i> 500 แต้ม</span>
+                                <button class="btn btn-sm btn-primary" onclick="redeem(500, 'ก๋วยเตี๋ยวฟรี 1 ชาม')">แลกสิทธิ์</button>
+                            </div>
+                        </div>
                     </div>
-                    <button class="btn-primary btn-sm" onclick="redeemDemo()">แลกสิทธิ์</button>
-                </div>
-                 <div class="reward-item">
-                    <div class="reward-info">
-                        <h4>ส่วนลด 50 บาท</h4>
-                        <p><i class="fa-solid fa-coins"></i> 300 Point</p>
+                    <!-- Reward Item 2 -->
+                    <div class="reward-card mt-15">
+                        <div class="reward-img" style="background-image: url('https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&w=500&q=60');"></div>
+                        <div class="reward-detail">
+                            <h4>เกี๊ยวทอดกรอบ ฟรี</h4>
+                            <p class="text-gray text-sm">รับฟรีเกี๊ยวทอด 1 จาน เมื่อทานอาหารในร้าน</p>
+                            <div class="d-flex-between align-center mt-10">
+                                <span class="points-req"><i class="fa-solid fa-coins"></i> 150 แต้ม</span>
+                                <button class="btn btn-sm btn-primary" onclick="redeem(150, 'เกี๊ยวทอดกรอบ ฟรี')">แลกสิทธิ์</button>
+                            </div>
+                        </div>
                     </div>
-                    <button class="btn-primary btn-sm" onclick="redeemDemo()">แลกสิทธิ์</button>
                 </div>
             </div>
         </div>
 
-        <!-- View: Profile -->
-        <div id="viewProfile" class="view-section">
-            <div class="page-header">
-                <h2>บัญชีของฉัน</h2>
+        <!-- ================= BOTTOM NAVIGATION ================= -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchView('viewHome', this)">
+                <i class="fa-solid fa-house"></i><span>หน้าหลัก</span>
             </div>
-            <div class="content-padding">
-                <div class="profile-menu">
-                    <div class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติการได้แต้ม</div>
-                    <div class="menu-item"><i class="fa-solid fa-ticket"></i> คูปองของฉัน</div>
-                    <div class="menu-item"><i class="fa-solid fa-circle-question"></i> ติดต่อร้าน / แจ้งปัญหา</div>
-                </div>
+            <div class="nav-item" onclick="switchView('viewRewards', this)">
+                <i class="fa-solid fa-gift"></i><span>แลกรางวัล</span>
             </div>
-        </div>
-
-        <!-- Modal QR -->
-        <div id="qrModal" class="modal">
-            <div class="modal-content">
-                <span class="close-btn" onclick="closeQRModal()"><i class="fa-solid fa-xmark"></i></span>
-                <h3>QR สแกนสะสมแต้ม</h3>
-                <p>ยื่นให้พนักงานสแกนเพื่อสะสม/ใช้คะแนน</p>
-                <div id="qrcodeDisplay" class="qr-box"></div>
-                <p class="mt-10" id="qrMemberIdTxt"></p>
+            <div class="nav-item" onclick="alertSystem()">
+                <i class="fa-solid fa-user"></i><span>บัญชี</span>
             </div>
         </div>
-
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <a href="#" class="nav-item active" onclick="switchView('viewHome', this)">
-                <i class="fa-solid fa-house"></i>
-                <span>หน้าหลัก</span>
-            </a>
-            <a href="#" class="nav-item" onclick="switchView('viewRewards', this)">
-                <i class="fa-solid fa-gift"></i>
-                <span>รางวัล</span>
-            </a>
-            <a href="#" class="nav-item" onclick="switchView('viewProfile', this)">
-                <i class="fa-solid fa-user"></i>
-                <span>บัญชี</span>
-            </a>
-        </nav>
     </div>
 
-    <script src="js/app.js"></script>
+    <!-- QR Modal Template -->
+    <script type="text/template" id="qrTemplate">
+        <div class="text-center">
+            <h3 class="mb-10 text-brown">สแกนเพื่อสะสมแต้ม</h3>
+            <p class="text-gray text-sm mb-20">ยื่นหน้าจอนี้ให้พนักงานของร้าน</p>
+            <div id="qrBox" class="p-10 bg-white" style="display:inline-block; border-radius: 12px; border: 2px solid #C5A059;"></div>
+            <h4 class="mt-20 text-gold" id="qrIdText"></h4>
+        </div>
+    </script>
+
+    <script src="app.js"></script>
 </body>
 </html>
