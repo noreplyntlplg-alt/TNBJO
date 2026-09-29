@@ -2,8 +2,8 @@
 // TNBJO APP LOGIC (app.js)
 // ==========================================
 const CONFIG = {
-    LIFF_ID: "YOUR_LIFF_ID", // ใส่ LIFF ID (เช่น 1234567890-AbCdEfG)
-    API_URL: "YOUR_GAS_WEB_APP_URL" // ใส่ URL ของเว็บแอปที่ Deploy จาก Code.gs
+    LIFF_ID: "2011791349-cKlWurTV", // ใส่ LIFF ID (เช่น 1234567890-AbCdEfG)
+    API_URL: "https://script.google.com/macros/s/AKfycbyVRqZvi_FvC7g6TkaqPtFO9wovgc9_xy1jcKCsz_o2GzZs8VVrlCmsSYsr51fkqj-b/exec" // ใส่ URL ของเว็บแอปที่ Deploy จาก Code.gs
 };
 
 let userProfile = null; // ข้อมูลจาก LINE
