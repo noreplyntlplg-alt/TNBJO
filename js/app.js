@@ -1,7 +1,7 @@
 // Configuration
 const CONFIG = {
-    LIFF_ID: "YOUR_LIFF_ID_HERE", // ใส่ LIFF ID ที่ได้จาก LINE Developers
-    API_URL: "YOUR_GAS_WEB_APP_URL_HERE" // ใส่ URL ของ Web App หลัง Deploy GAS
+    LIFF_ID: "2011791349-cKlWurTV", // ใส่ LIFF ID ที่ได้จาก LINE Developers
+    API_URL: "https://script.google.com/macros/s/AKfycbyVRqZvi_FvC7g6TkaqPtFO9wovgc9_xy1jcKCsz_o2GzZs8VVrlCmsSYsr51fkqj-b/exec" // ใส่ URL ของ Web App หลัง Deploy GAS
 };
 
 let currentUserData = null;
